@@ -153,7 +153,8 @@ Filters.prototype.process = function(func) {
  * Method to download the image
  */
 Filters.prototype.save = function(link) {
-	var filename = + new Date()+".png";
+	var timestamp = + new Date();
+	var filename = "flickr_editor_" + timestamp + ".png";
 
 	ctx.drawImage(draw_canvas, 0, 0);
 	link.href = canvas.toDataURL();

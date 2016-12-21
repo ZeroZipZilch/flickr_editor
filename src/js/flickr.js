@@ -1,5 +1,4 @@
-const search_box = document.querySelector(".flickr_search_box");
-const search_form = document.querySelector(".flickr_search_form");
+import {search_box, search_form, info} from './variables';
 
 let flickr_images = [];
 
@@ -51,6 +50,7 @@ function make_flickr_api_request(method, param) {
 	return new Promise((resolve, reject) => {
 		var xhr = new XMLHttpRequest();
 		xhr.open('GET', make_flickr_url(method, param));
+
 		xhr.onload = function() {
 			if(this.status >= 200 && this.status < 300) {
 				resolve(xhr.response);
@@ -155,17 +155,26 @@ export function getImages(page) {
 				if(sizes_array[n].label == "Small") 
 					thumbnail = sizes_array[n].source;
 				
-				if(sizes_array[n].label == "Original") {
+				if(sizes_array[n].label == "Large") {
 					large = sizes_array[n].source;
 					width = sizes_array[n].width;
 					height = sizes_array[n].height;
 				}
 			}
 
+			if(!large) {
+				info.innerHTML = "This image doesn't seem to exist in the size this app uses";
+				info.style = "";
+			}
+			else {
+				info.innerHTML = "";
+				info.style = "display:none;";
+			}
 			// Add image object to the images array
 			photo_sources.push({thumbnail, large, width, height});
 		}
 
+		info.style = "display:none";
 		return photo_sources;
 	});
 
@@ -178,6 +187,9 @@ export function getImages(page) {
  * to flickr
  */
 function search_flickr(tags) {
+	info.innerHTML = "Loading images";
+	info.style = "";
+
 	return make_flickr_api_request("flickr.photos.search", tags);
 }
 

@@ -163,6 +163,18 @@ textarea {
   align-items: center; }
   #canvas_container .draw_canvas {
     position: absolute; }
+  #canvas_container .info {
+    position: absolute;
+    margin: auto;
+    width: 30%;
+    height: 250px;
+    background: #777781;
+    color: #c7c7c7;
+    border: 1px solid rgba(59, 59, 69, 0.8);
+    border-radius: 3px;
+    display: flex;
+    justify-content: center;
+    align-items: center; }
 
 #tools {
   flex: 1;

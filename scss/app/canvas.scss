@@ -5,3 +5,17 @@
 .draw_canvas {
 	position: absolute;
 }
+
+.info {
+	position: absolute;
+	margin: auto;
+	width: 30%;
+	height: 250px;
+	background: rgba(119, 119, 129, 1);
+	color: rgba(199, 199, 199, 1);
+	border: 1px solid rgba(59, 59, 69, 0.8);
+	border-radius: 3px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}

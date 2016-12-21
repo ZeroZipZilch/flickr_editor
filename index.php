@@ -26,6 +26,7 @@
             <div id="canvas_container">
                 <canvas class="canvas"></canvas>
                 <canvas class="draw_canvas"></canvas>
+                <div class="info" style="display:none;"></div>
             </div>
             <div id="tools" style="display:none;">
                 <button class="flip">Flip Image</button>

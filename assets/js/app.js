@@ -46,9 +46,9 @@
 
 	'use strict';
 	
-	var _canvas = __webpack_require__(3);
+	var _canvas = __webpack_require__(1);
 	
-	var _event_listeners = __webpack_require__(5);
+	var _event_listeners = __webpack_require__(4);
 	
 	var _event_listeners2 = _interopRequireDefault(_event_listeners);
 	
@@ -59,225 +59,6 @@
 
 /***/ },
 /* 1 */
-/***/ function(module, exports) {
-
-	"use strict";
-	
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	var search_box = exports.search_box = document.querySelector(".flickr_search_box");
-	var search_form = exports.search_form = document.querySelector(".flickr_search_form");
-	var thumbnails_container = exports.thumbnails_container = document.querySelector(".thumbnails_container");
-	var tools = exports.tools = document.querySelector("#tools");
-	var canvas_container = exports.canvas_container = document.querySelector("#canvas_container");
-	var white_balance_slider = exports.white_balance_slider = document.querySelector("#white_balance_slider");
-	var brightness_slider = exports.brightness_slider = document.querySelector("#brightness_slider");
-	var canvas = exports.canvas = document.querySelector(".canvas");
-	var draw_canvas = exports.draw_canvas = document.querySelector(".draw_canvas");
-	var draw_canvas_ctx = exports.draw_canvas_ctx = document.querySelector(".draw_canvas").getContext('2d');
-	var draw = exports.draw = document.querySelector(".draw");
-	var ctx = exports.ctx = canvas.getContext('2d');
-
-/***/ },
-/* 2 */
-/***/ function(module, exports) {
-
-	"use strict";
-	
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
-	exports.getImages = getImages;
-	var search_box = document.querySelector(".flickr_search_box");
-	var search_form = document.querySelector(".flickr_search_form");
-	
-	var flickr_images = [];
-	
-	/**
-	 * Method to make a flickr_url
-	 * @param  {string} method What method to call from the flickr.api
-	 * @param  param  Extra parameters for the URL
-	 * @return {string}        API URL
-	 */
-	function make_flickr_url(method, param) {
-		var api_key = "def6981d1e064bf25f16a7542d848ace";
-		var flickr_url = "https://api.flickr.com/services/rest/?nojsoncallback=1&format=json&method=" + method + "&api_key=" + api_key;
-	
-		// If we are doing a search on photos
-		if (method == 'flickr.photos.search') {
-			// Add a tags parameter to the URL
-			flickr_url += "&tags=";
-	
-			// Get the tags from the search box
-			// and split it based on comma
-			var search_string = search_box.value;
-			var tags = search_string.split(',');
-	
-			// Add them to the URL, separated by comma
-			for (var i = 0; i < tags.length; i++) {
-				if (i !== 0) {
-					flickr_url += ",";
-				}
-	
-				flickr_url += tags[i];
-			}
-		}
-		if (method == 'flickr.photos.getSizes') {
-			flickr_url += "&photo_id=" + param;
-		}
-	
-		return flickr_url;
-	}
-	
-	/**
-	 * Make a flickr API request
-	 * @param  {string} method What method to call from the flickr.api
-	 * @param  param  Extra parameters for the URL
-	 * @return {Promise}        Returns a Promise containing
-	 *                          whatever the XMLHttpRequest returned
-	 */
-	function make_flickr_api_request(method, param) {
-		return new Promise(function (resolve, reject) {
-			var xhr = new XMLHttpRequest();
-			xhr.open('GET', make_flickr_url(method, param));
-			xhr.onload = function () {
-				if (this.status >= 200 && this.status < 300) {
-					resolve(xhr.response);
-				} else {
-					reject({ status: this.status, statusText: xhr.statusText });
-				}
-			};
-	
-			xhr.onerror = function () {
-				reject({ status: this.status, statusText: xhr.statusText });
-			};
-	
-			xhr.send();
-		});
-	}
-	
-	/**
-	 * Gets the images based on the return value
-	 * of make_flickr_api_request. There's no error handling.
-	 * That's mainly due to lack of time. Sorry.
-	 *
-	 * The page parameter is not being dynamically assigned
-	 * from functions calling this function.
-	 * This is mainly due to lack of time as well.
-	 */
-	function getImages(page) {
-		// Here we're assiging an entire promise to the variable images.
-		// At the end of this promise-chain, an array
-		// containing object with the image URLs for thumbnail (a bit bigger)
-		// and original size, as well as the image width and height.
-		// 
-		// First search flickr using our helper method
-		var images = search_flickr().then(function (json_string) {
-			// Then parse the return value
-			return JSON.parse(json_string);
-		}).then(function (images) {
-			// Then return the array containing the photos
-			return images.photos.photo;
-		}).then(function (photos) {
-			// Then pick 5 photos starting from the first
-			// photo on the page we're on (based on page arg)
-			var photos_array = [];
-	
-			var photos_start = page * 5;
-			var photos_end = page * 5 + 5;
-	
-			if (photos_end > photos.length) photos_end = photos.length;
-	
-			for (var i = photos_start; i < photos_end; i++) {
-				photos_array.push(photos[i]);
-			}
-	
-			return photos_array;
-		}).then(function (photos_array) {
-			// Then get the image URL's for the thumbnail and canvas-image
-			// based on the ID from photos saved in the previous step
-			var photos_array_string = [];
-	
-			for (var i = 0; i < photos_array.length; i++) {
-				photos_array_string.push(getImage(photos_array[i].id));
-			}
-	
-			// Since getImage returns a Promise, we resolve
-			// all the promises in photos_array_string before passing
-			// it on to the next step
-			return Promise.all(photos_array_string);
-		}).then(function (photos_array_strings) {
-			// And here we parse all the strings in the array
-			var photos_array = [];
-	
-			for (var i = 0; i < photos_array_strings.length; i++) {
-				photos_array.push(JSON.parse(photos_array_strings[i]));
-			}
-	
-			return photos_array;
-		}).then(function (photos_array) {
-			// And here we save a thumbnail url, large image url, image width and height
-			// to a photo_sources array, and then we pass it as a return value.
-			var photo_sources = [];
-	
-			for (var i = 0; i < photos_array.length; i++) {
-				// We chose to actually get all sizes rather than the image_context,
-				// so we now have access to multiple image sizes.
-				var sizes_array = photos_array[i].sizes.size;
-	
-				var thumbnail;
-				var large;
-				var width;
-				var height;
-	
-				// We loop through all the sizes, until we find
-				// the small and original one.
-				// 
-				// We should handle an error here in case an image
-				// doesn't exist, but yeah.. I didn't, because I wanted to
-				// prioritize other things. But some images don't
-				// exist as small/ original (I think, because sometimes images
-				// don't show up)
-				for (var n = 0; n < sizes_array.length; n++) {
-					if (sizes_array[n].label == "Small") thumbnail = sizes_array[n].source;
-	
-					if (sizes_array[n].label == "Original") {
-						large = sizes_array[n].source;
-						width = sizes_array[n].width;
-						height = sizes_array[n].height;
-					}
-				}
-	
-				// Add image object to the images array
-				photo_sources.push({ thumbnail: thumbnail, large: large, width: width, height: height });
-			}
-	
-			return photo_sources;
-		});
-	
-		// Return the images array we made with the promise-chain above
-		return images;
-	}
-	
-	/**
-	 * Just a short method for making a search API request
-	 * to flickr
-	 */
-	function search_flickr(tags) {
-		return make_flickr_api_request("flickr.photos.search", tags);
-	}
-	
-	/**
-	 * Just a short method for making a getImage API request
-	 * to flickr
-	 */
-	function getImage(id) {
-		return make_flickr_api_request("flickr.photos.getSizes", id);
-	}
-
-/***/ },
-/* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -289,9 +70,9 @@
 	exports.change_canvas_size = change_canvas_size;
 	exports.make_image_list = make_image_list;
 	
-	var _variables = __webpack_require__(1);
+	var _variables = __webpack_require__(2);
 	
-	var _canvas_tools = __webpack_require__(4);
+	var _canvas_tools = __webpack_require__(3);
 	
 	var _canvas_tools2 = _interopRequireDefault(_canvas_tools);
 	
@@ -340,6 +121,9 @@
 			thumbnail.setAttribute("data-height", images[i].height);
 	
 			thumbnails_container.appendChild(thumbnail).addEventListener('click', function () {
+				_variables.info.innerHTML = "Loading image";
+				_variables.info.style = "";
+	
 				change_canvas_size(this.dataset.width, this.dataset.height);
 				load_image(this.dataset.large);
 				_variables.canvas.setAttribute("data-source", this.dataset.large);
@@ -366,6 +150,7 @@
 			_variables.ctx.drawImage(img, 0, 0, img_width, img_height, 0, 0, _variables.canvas.width, _variables.canvas.height);
 			exports.img_src = img_src = url;
 			_variables.tools.style = "";
+			_variables.info.style = "display:none;";
 		});
 	
 		img.crossOrigin = '';
@@ -375,7 +160,30 @@
 	}
 
 /***/ },
-/* 4 */
+/* 2 */
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	var search_box = exports.search_box = document.querySelector(".flickr_search_box");
+	var search_form = exports.search_form = document.querySelector(".flickr_search_form");
+	var thumbnails_container = exports.thumbnails_container = document.querySelector(".thumbnails_container");
+	var tools = exports.tools = document.querySelector("#tools");
+	var canvas_container = exports.canvas_container = document.querySelector("#canvas_container");
+	var white_balance_slider = exports.white_balance_slider = document.querySelector("#white_balance_slider");
+	var brightness_slider = exports.brightness_slider = document.querySelector("#brightness_slider");
+	var canvas = exports.canvas = document.querySelector(".canvas");
+	var info = exports.info = document.querySelector(".info");
+	var draw_canvas = exports.draw_canvas = document.querySelector(".draw_canvas");
+	var draw_canvas_ctx = exports.draw_canvas_ctx = document.querySelector(".draw_canvas").getContext('2d');
+	var draw = exports.draw = document.querySelector(".draw");
+	var ctx = exports.ctx = canvas.getContext('2d');
+
+/***/ },
+/* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -384,9 +192,9 @@
 		value: true
 	});
 	
-	var _canvas = __webpack_require__(3);
+	var _canvas = __webpack_require__(1);
 	
-	var _variables = __webpack_require__(1);
+	var _variables = __webpack_require__(2);
 	
 	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 	
@@ -541,7 +349,8 @@
 	 * Method to download the image
 	 */
 	Filters.prototype.save = function (link) {
-		var filename = +new Date() + ".png";
+		var timestamp = +new Date();
+		var filename = "flickr_editor_" + timestamp + ".png";
 	
 		_variables.ctx.drawImage(_variables.draw_canvas, 0, 0);
 		link.href = _variables.canvas.toDataURL();
@@ -638,7 +447,7 @@
 	exports.default = Filter;
 
 /***/ },
-/* 5 */
+/* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -648,13 +457,13 @@
 	});
 	exports.default = make_event_listeners;
 	
-	var _variables = __webpack_require__(1);
+	var _variables = __webpack_require__(2);
 	
-	var _flickr = __webpack_require__(2);
+	var _flickr = __webpack_require__(5);
 	
-	var _canvas = __webpack_require__(3);
+	var _canvas = __webpack_require__(1);
 	
-	var _canvas_tools = __webpack_require__(4);
+	var _canvas_tools = __webpack_require__(3);
 	
 	var _canvas_tools2 = _interopRequireDefault(_canvas_tools);
 	
@@ -802,6 +611,215 @@
 		y -= _variables.canvas.offsetTop;
 	
 		return { x: x, y: y };
+	}
+
+/***/ },
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	exports.getImages = getImages;
+	
+	var _variables = __webpack_require__(2);
+	
+	var flickr_images = [];
+	
+	/**
+	 * Method to make a flickr_url
+	 * @param  {string} method What method to call from the flickr.api
+	 * @param  param  Extra parameters for the URL
+	 * @return {string}        API URL
+	 */
+	function make_flickr_url(method, param) {
+		var api_key = "def6981d1e064bf25f16a7542d848ace";
+		var flickr_url = "https://api.flickr.com/services/rest/?nojsoncallback=1&format=json&method=" + method + "&api_key=" + api_key;
+	
+		// If we are doing a search on photos
+		if (method == 'flickr.photos.search') {
+			// Add a tags parameter to the URL
+			flickr_url += "&tags=";
+	
+			// Get the tags from the search box
+			// and split it based on comma
+			var search_string = _variables.search_box.value;
+			var tags = search_string.split(',');
+	
+			// Add them to the URL, separated by comma
+			for (var i = 0; i < tags.length; i++) {
+				if (i !== 0) {
+					flickr_url += ",";
+				}
+	
+				flickr_url += tags[i];
+			}
+		}
+		if (method == 'flickr.photos.getSizes') {
+			flickr_url += "&photo_id=" + param;
+		}
+	
+		return flickr_url;
+	}
+	
+	/**
+	 * Make a flickr API request
+	 * @param  {string} method What method to call from the flickr.api
+	 * @param  param  Extra parameters for the URL
+	 * @return {Promise}        Returns a Promise containing
+	 *                          whatever the XMLHttpRequest returned
+	 */
+	function make_flickr_api_request(method, param) {
+		return new Promise(function (resolve, reject) {
+			var xhr = new XMLHttpRequest();
+			xhr.open('GET', make_flickr_url(method, param));
+	
+			xhr.onload = function () {
+				if (this.status >= 200 && this.status < 300) {
+					resolve(xhr.response);
+				} else {
+					reject({ status: this.status, statusText: xhr.statusText });
+				}
+			};
+	
+			xhr.onerror = function () {
+				reject({ status: this.status, statusText: xhr.statusText });
+			};
+	
+			xhr.send();
+		});
+	}
+	
+	/**
+	 * Gets the images based on the return value
+	 * of make_flickr_api_request. There's no error handling.
+	 * That's mainly due to lack of time. Sorry.
+	 *
+	 * The page parameter is not being dynamically assigned
+	 * from functions calling this function.
+	 * This is mainly due to lack of time as well.
+	 */
+	function getImages(page) {
+		// Here we're assiging an entire promise to the variable images.
+		// At the end of this promise-chain, an array
+		// containing object with the image URLs for thumbnail (a bit bigger)
+		// and original size, as well as the image width and height.
+		// 
+		// First search flickr using our helper method
+		var images = search_flickr().then(function (json_string) {
+			// Then parse the return value
+			return JSON.parse(json_string);
+		}).then(function (images) {
+			// Then return the array containing the photos
+			return images.photos.photo;
+		}).then(function (photos) {
+			// Then pick 5 photos starting from the first
+			// photo on the page we're on (based on page arg)
+			var photos_array = [];
+	
+			var photos_start = page * 5;
+			var photos_end = page * 5 + 5;
+	
+			if (photos_end > photos.length) photos_end = photos.length;
+	
+			for (var i = photos_start; i < photos_end; i++) {
+				photos_array.push(photos[i]);
+			}
+	
+			return photos_array;
+		}).then(function (photos_array) {
+			// Then get the image URL's for the thumbnail and canvas-image
+			// based on the ID from photos saved in the previous step
+			var photos_array_string = [];
+	
+			for (var i = 0; i < photos_array.length; i++) {
+				photos_array_string.push(getImage(photos_array[i].id));
+			}
+	
+			// Since getImage returns a Promise, we resolve
+			// all the promises in photos_array_string before passing
+			// it on to the next step
+			return Promise.all(photos_array_string);
+		}).then(function (photos_array_strings) {
+			// And here we parse all the strings in the array
+			var photos_array = [];
+	
+			for (var i = 0; i < photos_array_strings.length; i++) {
+				photos_array.push(JSON.parse(photos_array_strings[i]));
+			}
+	
+			return photos_array;
+		}).then(function (photos_array) {
+			// And here we save a thumbnail url, large image url, image width and height
+			// to a photo_sources array, and then we pass it as a return value.
+			var photo_sources = [];
+	
+			for (var i = 0; i < photos_array.length; i++) {
+				// We chose to actually get all sizes rather than the image_context,
+				// so we now have access to multiple image sizes.
+				var sizes_array = photos_array[i].sizes.size;
+	
+				var thumbnail;
+				var large;
+				var width;
+				var height;
+	
+				// We loop through all the sizes, until we find
+				// the small and original one.
+				// 
+				// We should handle an error here in case an image
+				// doesn't exist, but yeah.. I didn't, because I wanted to
+				// prioritize other things. But some images don't
+				// exist as small/ original (I think, because sometimes images
+				// don't show up)
+				for (var n = 0; n < sizes_array.length; n++) {
+					if (sizes_array[n].label == "Small") thumbnail = sizes_array[n].source;
+	
+					if (sizes_array[n].label == "Large") {
+						large = sizes_array[n].source;
+						width = sizes_array[n].width;
+						height = sizes_array[n].height;
+					}
+				}
+	
+				if (!large) {
+					_variables.info.innerHTML = "This image doesn't seem to exist in the size this app uses";
+					_variables.info.style = "";
+				} else {
+					_variables.info.innerHTML = "";
+					_variables.info.style = "display:none;";
+				}
+				// Add image object to the images array
+				photo_sources.push({ thumbnail: thumbnail, large: large, width: width, height: height });
+			}
+	
+			_variables.info.style = "display:none";
+			return photo_sources;
+		});
+	
+		// Return the images array we made with the promise-chain above
+		return images;
+	}
+	
+	/**
+	 * Just a short method for making a search API request
+	 * to flickr
+	 */
+	function search_flickr(tags) {
+		_variables.info.innerHTML = "Loading images";
+		_variables.info.style = "";
+	
+		return make_flickr_api_request("flickr.photos.search", tags);
+	}
+	
+	/**
+	 * Just a short method for making a getImage API request
+	 * to flickr
+	 */
+	function getImage(id) {
+		return make_flickr_api_request("flickr.photos.getSizes", id);
 	}
 
 /***/ }

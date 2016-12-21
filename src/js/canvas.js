@@ -1,4 +1,4 @@
-import {canvas, draw_canvas, ctx, draw_canvas_ctx, tools} from './variables';
+import {canvas, draw_canvas, ctx, draw_canvas_ctx, tools, info} from './variables';
 import Filter from './canvas_tools';
 
 const thumbnails_container = document.querySelector(".thumbnails_container");
@@ -41,6 +41,9 @@ export function make_image_list(images) {
 		thumbnail.setAttribute("data-height", images[i].height);
 
 		thumbnails_container.appendChild(thumbnail).addEventListener('click', function() {
+			info.innerHTML = "Loading image";
+			info.style = "";
+
 			change_canvas_size(this.dataset.width, this.dataset.height);
 			load_image(this.dataset.large);
 			canvas.setAttribute("data-source", this.dataset.large);
@@ -68,6 +71,7 @@ function load_image(url) {
 					  0, 0, canvas.width, canvas.height);
 		img_src = url;
 		tools.style = "";
+		info.style = "display:none;";
 	});
 
 	img.crossOrigin = '';

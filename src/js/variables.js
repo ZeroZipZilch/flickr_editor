@@ -6,6 +6,7 @@ export const canvas_container = document.querySelector("#canvas_container");
 export const white_balance_slider = document.querySelector("#white_balance_slider");
 export const brightness_slider = document.querySelector("#brightness_slider");
 export const canvas = document.querySelector(".canvas");
+export const info = document.querySelector(".info");
 export const draw_canvas = document.querySelector(".draw_canvas");
 export const draw_canvas_ctx = document.querySelector(".draw_canvas").getContext('2d');
 export const draw = document.querySelector(".draw");
