@@ -1,0 +1,39 @@
+@import 'reset.scss';
+
+#app {
+	width: 100%;
+	height: 100vh;
+	display: flex;
+	color: #fcfcfc;
+}
+
+#images {
+	@import 'app/images';
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	background: #343434;
+	padding: 15px;
+	padding-top: 50px;
+}
+
+#canvas_container {
+	flex: 4;
+	background: #656565;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+
+	@import 'app/canvas'
+}
+
+#tools {
+	flex: 1;
+	background: #9a9a9a;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding-top: 50px;
+
+	@import 'app/tools';
+}

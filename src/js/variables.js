@@ -1,0 +1,12 @@
+export const search_box = document.querySelector(".flickr_search_box");
+export const search_form = document.querySelector(".flickr_search_form");
+export const thumbnails_container = document.querySelector(".thumbnails_container");
+export const tools = document.querySelector("#tools");
+export const canvas_container = document.querySelector("#canvas_container");
+export const white_balance_slider = document.querySelector("#white_balance_slider");
+export const brightness_slider = document.querySelector("#brightness_slider");
+export const canvas = document.querySelector(".canvas");
+export const draw_canvas = document.querySelector(".draw_canvas");
+export const draw_canvas_ctx = document.querySelector(".draw_canvas").getContext('2d');
+export const draw = document.querySelector(".draw");
+export const ctx = canvas.getContext('2d');

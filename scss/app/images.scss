@@ -1,0 +1,39 @@
+
+.flickr_search_form {
+	display: flex;
+	justify-content: space-around;
+	align-items: center;
+	margin-top: 15px;
+}
+
+.flickr_search_box {
+	box-sizing: border-box;
+	padding: 3px 10px 3px;
+	background: #fcfcfc;
+	flex: 10;
+	height: 30px;
+	border-radius: 4px;
+}
+
+.search_flickr {
+	padding: 5px;
+	background: rgba(130, 130, 130, 1);
+	margin-left: 5px;
+	border-radius: 3px;
+	flex: 1;
+}
+
+.thumbnails_container {
+	display: flex;
+	flex-direction: column;
+	padding-top: 15px;
+	max-height: 80vh;
+}
+
+.image {
+	background: green;
+	height: 150px;
+	flex: 1;
+	margin-bottom: 15px;
+	cursor: pointer;
+}

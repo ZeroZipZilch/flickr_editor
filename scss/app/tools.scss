@@ -1,0 +1,26 @@
+button, div, input[type="range"] {
+	margin-bottom: 50px;
+}
+
+.hsl_container {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	justify-content: space-between;
+	flex: 1;
+
+	input[type="range"] {
+		margin-top: 15px;
+		margin-bottom: 15px;
+	}
+}
+
+.draw.active {
+	background: rgba(110, 159, 255, 1);
+	padding: 10px 50px;
+	border-radius: 5px;
+}
+
+.save {
+	cursor: pointer;
+}
